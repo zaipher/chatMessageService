@@ -1,0 +1,40 @@
+const { db } = require('../config/db');
+
+var MessagesService = (function() {
+    var save = function(name, message, callback) {
+        console.log("Saving message to database...");
+
+        var sql = `
+            INSERT INTO chat_logs (name, message, created_at) VALUES (?, ?, ?)
+        `
+
+        db.run(sql, name, message, new Date().toString(), (err) => {
+            if(err) {
+                console.log(err);
+                callback(false);
+            } else {
+                callback(true);
+            }
+        });
+    }
+
+    var getAll = function(callback) {
+        console.log("Getting all messages...");
+
+        var messages = [];
+        var sql = "SELECT * FROM chat_logs";
+        
+        db.each(sql, [], (err, row) => {
+            messages.push(row);
+        }, (err, found) => {
+            callback(messages);
+        });
+    }
+
+    return {
+        getAll: getAll,
+        save: save
+    }
+})();
+
+exports.MessagesService = MessagesService;
